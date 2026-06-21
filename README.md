@@ -46,6 +46,14 @@ La première semaine, corrige les brouillons qui ne te vont pas et note pourquoi
 
 ---
 
+## Bonus : la revue de tes abonnements
+
+Une fois par semaine :
+```bash
+./run-newsletters.sh
+```
+Il scanne tes 90 derniers jours, repère les newsletters que tu **ne lis plus** (avec le taux de lecture que même Gmail n'affiche pas) et te pose une revue en brouillon : « tu ne lis plus X, Y, Z → voici les liens de désabonnement ». Il ne désabonne rien : il rend visible ce qui te coûte de l'attention. Tu cliques, ou pas.
+
 ## Pour qui c'est rentable
 Plus de 30 mails/jour et ton temps vaut plus de 100 €/h → ça s'amortit en une semaine. En dessous de 20/jour, de simples filtres suffisent peut-être.
 
