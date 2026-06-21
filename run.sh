@@ -11,4 +11,8 @@ set -a; . ./.env; set +a
 command -v claude >/dev/null 2>&1 || { echo "Claude Code requis → https://claude.com/claude-code"; exit 1; }
 
 # Claude Code lit triage.md, appelle gmail_helper.py (Bash), classe, sauve les brouillons.
+# 1) Libellés visibles (déterministe, un seul par mail) : Triage/A repondre · A voir · A lire
+python3 relabel.py --query "newer_than:3d" || true
+
+# 2) Claude Code classe et prépare les brouillons des vrais échanges.
 claude -p "$(cat triage.md)" --allowed-tools "Bash" "Read"
