@@ -32,6 +32,10 @@ import argparse
 import re
 from datetime import datetime, timezone
 from email.utils import parseaddr, parsedate_to_datetime, formatdate, make_msgid
+try:
+    import detectors as _detectors
+except Exception:
+    _detectors = None
 
 def _load_env():
     import os as _os
@@ -151,7 +155,7 @@ def cmd_list(args):
         out = []
         for mid in ids:
             mid_s = mid.decode()
-            typ, env_data = m.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (SUBJECT FROM TO DATE MESSAGE-ID)] FLAGS X-GM-THRID)")
+            typ, env_data = m.fetch(mid, "(BODY.PEEK[HEADER.FIELDS (SUBJECT FROM TO DATE MESSAGE-ID REPLY-TO AUTO-SUBMITTED PRECEDENCE LIST-ID LIST-UNSUBSCRIBE LIST-UNSUBSCRIBE-POST X-AUTO-RESPONSE-SUPPRESS FEEDBACK-ID X-AUTOREPLY RETURN-PATH)] FLAGS X-GM-THRID)")
             if typ != "OK" or not env_data:
                 continue
             # env_data shape: [(b'1 (FLAGS (\\Seen) X-GM-THRID 1234 BODY[...] {N}', b'headers...'), b')']
@@ -170,6 +174,12 @@ def cmd_list(args):
                     env["unread"] = "\\Seen" not in flags
                     env["starred"] = "\\Flagged" in flags
                     env["thread_id"] = gm_thrid or mid_s
+                    if _detectors:
+                        try:
+                            _hdrs = {k: v for (k, v) in email.message_from_bytes(item[1]).items()}
+                            env["auto_signals"] = _detectors.detect(_hdrs, env.get("from", ""), env.get("subject", ""), "")
+                        except Exception:
+                            pass
                     out.append(env)
                     break
         print(json.dumps(out, ensure_ascii=False, indent=2))
@@ -218,6 +228,11 @@ def cmd_read(args):
             "starred": "\\Flagged" in flags,
             "labels": labels,
         }
+        if _detectors:
+            try:
+                out["auto_signals"] = _detectors.detect({k: v for (k, v) in msg.items()}, out["from"], out["subject"], out["body_text"])
+            except Exception:
+                pass
         print(json.dumps(out, ensure_ascii=False, indent=2))
     finally:
         try:
