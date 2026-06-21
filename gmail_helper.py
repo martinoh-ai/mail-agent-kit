@@ -336,6 +336,26 @@ def cmd_save_draft(args):
             pass
 
 
+def cmd_label(args):
+    m = connect_imap()
+    try:
+        m.select(INBOX)
+        mid = args.msgid.strip().strip(chr(60)).strip(chr(62))
+        typ, data = m.search(None, "X-GM-RAW", "rfc822msgid:" + mid)
+        ids = data[0].split() if data and data[0] else []
+        if not ids:
+            print(json.dumps({"error": "not found", "msgid": args.msgid}))
+            return
+        for sid in ids:
+            m.store(sid, "+X-GM-LABELS", chr(34) + args.label + chr(34))
+        print(json.dumps({"action": "labeled", "label": args.label, "count": len(ids)}, ensure_ascii=False))
+    finally:
+        try:
+            m.logout()
+        except Exception:
+            pass
+
+
 def main():
     p = argparse.ArgumentParser(description="Gmail helper for mail-triage SOUL")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -344,6 +364,10 @@ def main():
     p_list.add_argument("--max", type=int, default=80)
     p_list.add_argument("--query", type=str, default=None, help="Gmail X-GM-RAW query (e.g. 'newer_than:1d')")
     p_list.set_defaults(func=cmd_list)
+    p_label = sub.add_parser("label", help="Applique un libellé Gmail (par Message-ID, non destructif)")
+    p_label.add_argument("--msgid", required=True)
+    p_label.add_argument("--label", required=True)
+    p_label.set_defaults(func=cmd_label)
 
     p_read = sub.add_parser("read", help="Read a thread/message")
     p_read.add_argument("id")

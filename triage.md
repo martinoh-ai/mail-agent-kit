@@ -40,6 +40,13 @@ python3 gmail_helper.py save-draft --to "<expéditeur>" --subject "Re: <objet>" 
 - **N'envoie jamais. N'archive jamais** (je m'en occupe).
 - Si le sujet est sensible (argent, conflit, juridique, refus) ou s'il manque un élément que je suis seul à connaître → préfixe le brouillon de `⚠️ à relire` et mets `[à compléter : ...]` aux endroits incertains. Un brouillon honnêtement marqué vaut mieux qu'un brouillon faussement assuré.
 
+## 4bis. Rends le tri visible (libellés Gmail)
+Pose un libellé sur chaque email selon sa classe — non destructif, rien n'est déplacé ni archivé, tu vois juste le tri dans ta colonne de gauche :
+```
+python3 gmail_helper.py label --msgid "<message_id>" --label "Triage/A voir"
+```
+Mapping : urgent → `Triage/Urgent` · à répondre → `Triage/A repondre` · à voir / NOTIFY → `Triage/A voir` · à lire → `Triage/A lire`. À ignorer : pas de libellé. (Le `message_id` vient de l'étape `list`.)
+
 ## 5. Résume-moi la matinée
 ```
 📬 Tri du matin — <date>
