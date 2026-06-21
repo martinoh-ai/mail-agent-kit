@@ -1,0 +1,4 @@
+.env
+preferences.md
+__pycache__/
+*.pyc
